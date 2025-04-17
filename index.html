@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Japanese Dictionary</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f9f9f9;
+      background: #f2f2f2;
       max-width: 600px;
       margin: auto;
     }
@@ -17,31 +17,36 @@
     input {
       padding: 8px;
       width: 70%;
-      margin-bottom: 10px;
       font-size: 16px;
+      margin-right: 10px;
     }
     button {
-      padding: 8px 12px;
+      padding: 8px 16px;
       font-size: 16px;
     }
-    #results {
-      margin-top: 20px;
-    }
     .entry {
-      margin-bottom: 15px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
     .kanji {
       font-size: 20px;
       font-weight: bold;
+      color: #333;
+    }
+    .meaning {
+      font-size: 16px;
+      color: #666;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
-  <h2>📚 Japanese Dictionary Lookup</h2>
-  <div style="text-align: center;">
-    <input type="text" id="query" placeholder="Enter Japanese word...">
+  <h2>📘 Japanese Dictionary</h2>
+  <div style="text-align:center;">
+    <input type="text" id="query" placeholder="Type a Japanese word...">
     <button onclick="search()">Search</button>
   </div>
   <div id="results"></div>
@@ -51,11 +56,10 @@
       const word = document.getElementById("query").value.trim();
       if (!word) return;
 
-      const proxy = "https://corsproxy.io/?";
-      const url = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
+      const proxyURL = `https://corsproxy.io/?https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`;
 
       try {
-        const res = await fetch(proxy + encodeURIComponent(url));
+        const res = await fetch(proxyURL);
         const data = await res.json();
 
         const results = document.getElementById("results");
@@ -67,16 +71,18 @@
         }
 
         data.data.forEach(entry => {
-          const kanji = entry.japanese.map(j => j.word || j.reading).join(', ');
-          const meaning = entry.senses[0].english_definitions.join(', ');
-          results.innerHTML += `
+          const japanese = entry.japanese.map(j => j.word || j.reading).join(', ');
+          const english = entry.senses[0].english_definitions.join(', ');
+
+          const html = `
             <div class="entry">
-              <div class="kanji">${kanji}</div>
-              <div>${meaning}</div>
+              <div class="kanji">${japanese}</div>
+              <div class="meaning">${english}</div>
             </div>`;
+          results.innerHTML += html;
         });
       } catch (err) {
-        document.getElementById("results").innerHTML = '<p>Error fetching results. Please try again later.</p>';
+        document.getElementById("results").innerHTML = '<p>Failed to fetch data. Try again later.</p>';
         console.error(err);
       }
     }
