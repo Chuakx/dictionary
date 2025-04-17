@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Japanese Dictionary</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    input { padding: 8px; width: 70%; margin-bottom: 10px; }
+    button { padding: 8px 12px; }
+    #results { margin-top: 20px; }
+    .entry { margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h2>📚 Japanese Dictionary Lookup</h2>
+  <input type="text" id="query" placeholder="Enter Japanese word...">
+  <button onclick="search()">Search</button>
+  <div id="results"></div>
+
+  <script>
+    async function search() {
+      const word = document.getElementById("query").value.trim();
+      if (!word) return;
+      const res = await fetch(`https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(word)}`);
+      const data = await res.json();
+      const results = document.getElementById("results");
+      results.innerHTML = '';
+      if (data.data.length === 0) {
+        results.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+      data.data.forEach(entry => {
+        const kanji = entry.japanese.map(j => j.word || j.reading).join(', ');
+        const meaning = entry.senses[0].english_definitions.join(', ');
+        results.innerHTML += `<div class="entry"><strong>${kanji}</strong><br>${meaning}</div>`;
+      });
+    }
+  </script>
+</body>
+</html>
